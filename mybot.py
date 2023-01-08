@@ -28,19 +28,29 @@ def get_text_messages(message: telebot.types.Message) -> None:
         response = "Привет, чем я могу тебе помочь?"
         bot.send_message(chatId, response)
 
-    elif message.text == "/help":
-        bot.send_message(chatId, "Напиши привет")
+    elif message.text == "/help" or message.text == "/start":
+        response = """
+Доступные команды:
+/help - снова показать эту подсказку
+/list - показать текущий список напоминаний
+/add - добавление нового напоминания
+/rem - удаление напоминания
+/set_utc_offset - задать часовой пояс
+"""
+        bot.send_message(chatId, response)
 
     elif message.text == "/set_utc_offset":
         offsets = db.get_all_offsets()
 
-        response = f"Текущее время сервера {datetime.now().time()}, текущая таймзона {offsets.get(chatId, 0)}. Укажи разницу со своим временем в часах числом (например, 2 или -1)"
+        response = f"Текущее время сервера {datetime.now().time()}, текущий часовой пояс {offsets.get(chatId, 0)}. Укажи разницу со своим временем в часах числом (например, 2 или -1)"
         bot.send_message(chatId, response)
         bot.register_next_step_handler(message, ask_timezone)
 
     elif message.text == "/list":
         remindersList = db.list_by_user(chatId)
         reminders = '\n'.join(repr(r) for r in remindersList)
+        if not reminders:
+            reminders = "- Пусто"
 
         response = f"""
 Твой текущий список напоминаний:
@@ -56,7 +66,7 @@ def get_text_messages(message: telebot.types.Message) -> None:
         bot.register_next_step_handler(message, ask_content)
 
     elif message.text.startswith('/rem'):
-        response = "Что ты хочешь удалить?"
+        response = "Что ты хочешь удалить? Введи индекс из списка"
         bot.send_message(chatId, response)
         bot.register_next_step_handler(message, ask_rem)
 

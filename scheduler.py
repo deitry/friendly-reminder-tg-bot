@@ -12,7 +12,6 @@ class ReminderScheduler(Thread):
         Thread.__init__(self)
         self.daemon = True
 
-        self.db = db
         self.bot = bot
         self.last = datetime.datetime.now()
 
@@ -21,6 +20,8 @@ class ReminderScheduler(Thread):
         self.start()
 
     def run(self):
+        self.db = RemindersDb()
+
         while True:
             schedule.run_pending()
             time.sleep(1)
